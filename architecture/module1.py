@@ -17,6 +17,16 @@ def get_car_num():
     return string
 
 
+######################################################
+# Django DB에 저장
+# input : string src, string table
+# return : 0
+def save(src, table):
+    # src의 형태는 ',' 또는 ' '등으로 각 튜플 값을 구분한 attribute 값 string
+    # table의 형태는 table 이름
+    # table에 신규 attribute 저장
+
+
 
 
 ######################################################
@@ -70,3 +80,8 @@ def open_block_bar(is_allowed):
 
     3) return angle
     '''
+
+
+
+######################################################
+#

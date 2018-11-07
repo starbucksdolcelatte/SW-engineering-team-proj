@@ -121,7 +121,7 @@ def get_flr_info(floor):
 
 
 ######################################################
-# 칸마다 주차 상태 확인
+# 칸마다 occupied rate 분석 후 주차 칸 occupied rate DB에 update
 # input : image (주차장), string (구역(알파벳))
 # return : None
 # set unit occupied rate
@@ -131,5 +131,31 @@ def set_occu_rate(img, zone):
     # 이미지를 분석해서 해당 zone의 1...n번째 칸(unit)의 occupied rate 구함
     # 실시간 주차장 occupied 수치 테이블에서 zone이 일치하는 attr에 대하여
     # occu_rate를 update
+    # DB_update_set() 함수 씀
+    return None
+
+
+
+######################################################
+# 칸마다 주차 상태 분석 후 주차 칸 상태 DB에 update
+# 주차 상태는 occupied, empty, leaving(출차중)
+# input : string zone(구역(알파벳))
+# return : None
+# set unit status
+def set_unit_status(zone):
+    # 이 함수는 각 zone마다 설치된 라즈베리파이에서 개별적으로 돌아갈 것
+    # 각 라즈베리파이마다 고유값이 있고 그 고유값에 따라 zone이 결정됨
+    # 실시간 주차장 occupied 수치 테이블에서 zone이 일치하는 attr에 대하여
+    # occu_rate 1초에 한번씩 가져와서 list에 넣음.
+    # occu_rate 1초 전과 지금의 변화량을 가져와서 또다른 list에 넣음.
+    # 1초마다 갱신(옛날꺼 하나 지우고 지금꺼 하나 추가),
+    # 지난 n초 간의 occu_rate 변화량이 음수이고 변화량 평균이 criteria 이상이면
+    # 출차중으로 판단한다.
+
+    # 변화량 평균이 criteria 이하인 것들 중에
+    # occu_rate 평균이 기준치 이상이면 occupied
+    # occu_rate 평균이 기준치 이하이면 num_empty
+
+    # 결과를 DB에 update
     # DB_update_set() 함수 씀
     return None

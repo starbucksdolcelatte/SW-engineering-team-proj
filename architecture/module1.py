@@ -21,7 +21,7 @@ def get_car_num():
 # Django DB에 새로운 attr 삽입
 # input : string attr, string table
 # return : 0
-def insert(attr, table):
+def DB_insert(attr, table):
     # 구현
     # attr의 형태는 ',' 또는 ' '등으로 각 튜플 값을 구분한 attribute 값 string
     # table의 형태는 table 이름
@@ -33,12 +33,10 @@ def insert(attr, table):
 
 ######################################################
 # Django DB 값 수정
-# input : string attr, string table
+# input :
 # return : 0
-def (src, table):
-    # src의 형태는 ',' 또는 ' '등으로 각 튜플 값을 구분한 attribute 값 string
-    # table의 형태는 table 이름
-    # table에 신규 attribute 저장
+def DB_update_set (src, table, cond):
+    # table의 특정 attribute 값 수정
     return 0
 
 

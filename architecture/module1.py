@@ -35,8 +35,23 @@ def DB_insert(attr, table):
 # Django DB 값 수정
 # input :
 # return : 0
-def DB_update_set (src, table, cond):
+def DB_update_set ():
     # table의 특정 attribute 값 수정
+    return 0
+
+
+
+
+
+
+
+######################################################
+# Django DB 값 삭제
+# input :
+# return : 0
+def DB_delete ():
+    # table의 특정 attribute 값 삭제
+    
     return 0
 
 

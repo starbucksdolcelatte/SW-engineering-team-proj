@@ -42,16 +42,13 @@ def DB_update_set ():
 
 
 
-
-
-
 ######################################################
 # Django DB 값 삭제
 # input :
 # return : 0
 def DB_delete ():
     # table의 특정 attribute 값 삭제
-    
+
     return 0
 
 
@@ -98,18 +95,24 @@ def get_stats(std, s_date, e_date):
 def open_block_bar(is_allowed):
     #구현부
     '''
-    변수 1 angle = 0
-
     1) is_allowed 값이 true면
-    1-1) angle = 90
+    1-1) status = true
 
     2) is_allowed 값이 false면
-    2-1) 아무 동작 안함.
+    2-1) status = false
 
-    3) return angle
+    3) return None
     '''
 
 
 
 ######################################################
-#
+# 층마다 남은 자리수 계산 ( 전광판 )
+# input : ?
+# return : int num_empty
+# get floor info
+def get_flr_info():
+    # 실시간 주차장 테이블에서
+    # status == empty 인 attribute 개수 받아와서
+    # num_empty에 저장 후 return
+    return num_empty

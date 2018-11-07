@@ -108,7 +108,7 @@ def open_block_bar(is_allowed):
 
 ######################################################
 # 층마다 남은 자리수 계산 ( 전광판 )
-# input : floor - which floor? - e.g. 1st floor
+# input : string floor (몇층인지 : DB의 층 표현 포맷을 따름)
 # return : int num_empty
 # get floor info
 def get_flr_info(floor):
@@ -121,12 +121,15 @@ def get_flr_info(floor):
 
 
 ######################################################
-# 층마다 남은 자리수 계산 ( 전광판 )
-# input : ?
-# return : int num_empty
-# get floor info
-def get_flr_info():
-    # 실시간 주차장 테이블에서
-    # status == empty 인 attribute 개수 받아와서
-    # num_empty에 저장 후 return
-    return num_empty
+# 칸마다 주차 상태 확인
+# input : image (주차장), string (구역(알파벳))
+# return : None
+# set unit occupied rate
+def set_occu_rate(img, zone):
+    # 이 함수는 각 zone마다 설치된 라즈베리파이에서 개별적으로 돌아갈 것
+    # 각 라즈베리파이마다 고유값이 있고 그 고유값에 따라 zone이 결정됨
+    # 이미지를 분석해서 해당 zone의 1...n번째 칸(unit)의 occupied rate 구함
+    # 실시간 주차장 occupied 수치 테이블에서 zone이 일치하는 attr에 대하여
+    # occu_rate를 update
+    # DB_update_set() 함수 씀
+    return None

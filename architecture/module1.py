@@ -108,6 +108,20 @@ def open_block_bar(is_allowed):
 
 ######################################################
 # 층마다 남은 자리수 계산 ( 전광판 )
+# input : floor - which floor? - e.g. 1st floor
+# return : int num_empty
+# get floor info
+def get_flr_info(floor):
+    # 실시간 주차장 테이블에서
+    # unit_id == floor && status == empty 인
+    # attribute의 총 개수 받아와서
+    # num_empty에 저장 후 return
+    return num_empty
+
+
+
+######################################################
+# 층마다 남은 자리수 계산 ( 전광판 )
 # input : ?
 # return : int num_empty
 # get floor info

@@ -1,5 +1,5 @@
  class User:
-      def __init__(self, param):
+      def __init__(self, car_num):
           '''
           car_num : str
         card_info : str list
@@ -18,5 +18,7 @@
         set+위 모든 data fields
 
           '''
-          # something
-          return None
+          self._car_num = car_num
+
+      def get_car_num(self):
+          return self._car_num

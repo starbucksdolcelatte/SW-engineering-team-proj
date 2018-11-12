@@ -1,6 +1,7 @@
 import sqlite3
 
 # SQLite DB 연결
+# test.db가 있으면 연결, 없으면 새로 생성
 conn = sqlite3.connect("test.db")
 
 # Connection 으로부터 Cursor 생성

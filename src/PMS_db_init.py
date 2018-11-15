@@ -9,7 +9,8 @@ conn = sqlite3.connect("PMS_db.sqlite",detect_types=sqlite3.PARSE_DECLTYPES)
 cur = conn.cursor()
 
 # Insert
-cur.execute("INSERT INTO PARKINGLOT_LIST VALUES('B1-A1', 0, '99구9999')")
+for i in range (1,9):
+    cur.execute("INSERT INTO PARKINGLOT_LIST VALUES('B1-A"+str(i)+"', 0, NULL)")
 # SQL 쿼리 실행
 cur.execute("select * from PARKINGLOT_LIST")
 

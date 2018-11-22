@@ -30,7 +30,7 @@ cur.execute("""
 # Park_is_paid : 0 is false(N), 1 is true(Y)
 cur.execute("""
     CREATE TABLE PARK_PAY (
-    Ppay_id inte PRIMARY KEY,
+    Ppay_id INTEGER AUTOINCREMENT PRIMARY KEY,
 	Customer_car_num TEXT NOT NULL,
 	Parking_spot TEXT NOT NULL,
     Park_in timestamp NOT NULL,
@@ -52,7 +52,7 @@ cur.execute("""
 
 cur.execute("""
     CREATE TABLE SHOPPING_PAY (
-    Spay_id inte PRIMARY KEY,
+    Spay_id INTEGER AUTOINCREMENT PRIMARY KEY,
     Customer_car_num text ,
 	Shopping_pay_amount integer NOT NULL DEFAULT 0,
 	Shopping_pay_time timestamp ,

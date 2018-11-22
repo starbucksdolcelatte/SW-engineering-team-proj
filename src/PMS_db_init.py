@@ -7,13 +7,18 @@ random.seed(0)
 
 # SQLite DB 연결
 # test.db가 있으면 연결, 없으면 새로 생성
-conn = sqlite3.connect("PMS_db.sqlite",detect_types=sqlite3.PARSE_DECLTYPES)
+conn = sqlite3.connect("PMS_db.sqlite", detect_types=sqlite3.PARSE_DECLTYPES)
 
 # Connection 으로부터 Cursor 생성
 cur = conn.cursor()
 
 # Insert
+def insert_DB(table, values):
+    cur.execute("INSERT INTO " + table + " VALUES(" "'B"+str(floor)+"-"+string.ascii_uppercase[i]+str(j)+"', 0, NULL)")
 
+
+
+##################################################################
 ## PARKINGLOT_LIST = {Parking_spot, Parking_status, Customer_car_num}
 ## Parking_status : 0 == vacant ; 1 == occupied ; 2 == moving_out
 ## Total 3 levels, A-J zones, 1-10 spots
@@ -26,6 +31,10 @@ def init_parkinglot_list():
     return 0
 
 
+
+
+
+##################################################################
 ## CUSTOMER_LIST = {Customer_car_num, Customer_card_info, Customer_name}
 h_plate = ['가','나','다','라','마',
                  '거','너','더','러','머','버','서','어','저',
@@ -40,12 +49,13 @@ n_last = ['JOON', 'MI', 'AH', 'JOO', 'YEON', 'HYUK', 'SEOK','WOON']
 
 card = ['VISA', 'MasterCard', 'Amex', 'BC', 'UnionPay','JCB']
 
-def init_customer_list():
-    for i in range (0,5):
-        for j in range (0,9):
-            cur.execute("INSERT INTO CUSTOMER_LIST VALUES('"
-            + str(i) + str(j) + h_plate[random.randrange(len(h_plate))] + str(random.randrange(1000,9999)) +
-            "','" + card[random.randrange(len(card))] + " " + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) +
+
+# make test data of customer for CUSTOMER_LIST
+def mk_test_cust(cust_num):
+    for _ in range (cust_num):
+        cur.execute("INSERT INTO CUSTOMER_LIST VALUES('"
+        '{0:02d}'.format(random.randrange(100)) + h_plate[random.randrange(len(h_plate))] + '{0:04d}'.format(random.randrange(10000)) +
+            "','" + card[random.randrange(len(card))] + " " + '{0:04d}'.format(random.randrange(10000)) + "-" + '{0:04d}'.format(random.randrange(10000)) + "-" + '{0:04d}'.format(random.randrange(10000)) + "-" + '{0:04d}'.format(random.randrange(10000)) +
             "','" + n_first[random.randrange(len(n_first))] + " " + n_middle[random.randrange(len(n_middle))] + " " + n_last[random.randrange(len(n_last))] +
             "')")
     return 0
@@ -54,7 +64,7 @@ def init_customer_list():
 ## SHOPPING_PAY = {Spay_id, Customer_car_num, Shopping_pay_amount, Shopping_pay_time}
 def init_shopping_pay():
     for i in range (0,50):
-        for j in range (0,9):
+        for j in range (0,10):
             cur.execute("INSERT INTO SHOPPING_PAY VALUES('"
             + str(i) + str(j) + h_plate[random.randrange(len(h_plate))] + str(random.randrange(1000,9999)) +
             "','" + card[random.randrange(len(card))] + " " + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) +
@@ -63,8 +73,20 @@ def init_shopping_pay():
     return 0
 
 
-# SQL 쿼리 실행
-cur.execute("select * from PARKINGLOT_LIST")
+#init_parkinglot_list()
+#init_customer_list()
+
+# test case : normal data
+cur.execute("INSERT INTO CUSTOMER_LIST VALUES('12가1234','VISA 1234-1234-1234-1234', 'KIM MIN JI')")
+print('SUCCESS 1')
+
+# test case : abnormal data :: to test primary key collision
+cur.execute("INSERT INTO CUSTOMER_LIST VALUES('12가1234','VISA 1234-1234-1234-1234', 'KIM MIN JI')")
+print('SUCCESS 2')
+
+
+# SQL 쿼리 실행은 cur.execute로 함
+cur.execute("select * from CUSTOMER_LIST")
 
 # 데이타 Fetch
 rows = cur.fetchall()

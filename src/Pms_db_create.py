@@ -14,7 +14,7 @@ cur.execute("""
 	Parking_spot TEXT PRIMARY KEY,
 	Parking_status integer NOT NULL,
 	Customer_car_num TEXT,
-    
+
     CONSTRAINT fk_Customer
     FOREIGN KEY (Customer_car_num)
     REFERENCES  CUSTOMER_LIST(Customer_car_num)
@@ -37,7 +37,7 @@ cur.execute("""
     Park_in timestamp NOT NULL,
     Park_out timestamp NOT NULL,
     Park_free_hour integer NOT NULL DEFAULT 0,
-	Park_pay_amount integer NOT NULL DEFULT 0,
+	Park_pay_amount integer NOT NULL DEFAULT 0,
     Park_is_paid integer NOT NULL DEFAULT 0,
 
     CONSTRAINT fk_Parkinglot

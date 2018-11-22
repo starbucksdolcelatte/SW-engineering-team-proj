@@ -1,3 +1,5 @@
+# Created By Seoyoon Park
+
 import sqlite3
 from datetime import datetime, date
 import string
@@ -5,16 +7,13 @@ import random
 
 random.seed(0)
 
-# SQLite DB 연결
-# test.db가 있으면 연결, 없으면 새로 생성
+# Connect to SQLite DB
+## if exist "PMS_db.sqlite" then connect
+## if not exitst "PMS_db.sqlite" then create
 conn = sqlite3.connect("PMS_db.sqlite", detect_types=sqlite3.PARSE_DECLTYPES)
 
-# Connection 으로부터 Cursor 생성
+# Create cursir from DB Connection
 cur = conn.cursor()
-
-# Insert
-def insert_DB(table, values):
-    cur.execute("INSERT INTO " + table + " VALUES(" "'B"+str(floor)+"-"+string.ascii_uppercase[i]+str(j)+"', 0, NULL)")
 
 
 
@@ -25,9 +24,10 @@ def insert_DB(table, values):
 ## ['B3-J10', 0, NULL]
 def init_parkinglot_list():
     for floor in range (1,4):
-        for i in range (0,10):
-            for j in range (1,11):
-                cur.execute("INSERT INTO PARKINGLOT_LIST VALUES('B"+str(floor)+"-"+string.ascii_uppercase[i]+str(j)+"', 0, NULL)")
+        for zone in range (0,10):
+            for spot in range (1,11):
+                cur.execute("INSERT INTO PARKINGLOT_LIST VALUES('B"+str(floor)
+                +"-"+string.ascii_uppercase[zone]+str(spot)+"', 0, NULL)")
     return 0
 
 
@@ -43,15 +43,18 @@ h_plate = ['가','나','다','라','마',
                  '아','바','사','자',
                  '배','하','허','호']
 
-n_first = ['KIM','LEE', 'PARK', 'KONG', 'YOON', 'HYUN', 'KANG', 'JEONG', 'MOON', 'CHA', 'HAN', 'HWANG', 'HA']
-n_middle = ['SEO', 'MOON', 'YOON', 'KYUNG', 'HYUN', 'MIN', 'SOO', 'EUN', 'SEONG', 'JI']
+n_first = ['KIM','LEE', 'PARK', 'KONG', 'YOON', 'HYUN', 'KANG',
+            'JEONG', 'MOON', 'CHA', 'HAN', 'HWANG', 'HA']
+n_middle = ['SEO', 'MOON', 'YOON', 'KYUNG', 'HYUN', 'MIN',
+            'SOO', 'EUN', 'SEONG', 'JI']
 n_last = ['JOON', 'MI', 'AH', 'JOO', 'YEON', 'HYUK', 'SEOK','WOON']
 
 card = ['VISA', 'MasterCard', 'Amex', 'BC', 'UnionPay','JCB']
 
 
-# make test data of customer for CUSTOMER_LIST
-def mk_test_cust(cust_num):
+# Make sample tuple of CUSTOMER_LIST and insert it to CUSTOMER_LIST
+## CUSTOMER_LIST = { Customer_car_num, Customer_card_info, Customer_name }
+def mk_sample_cust(cust_num):
     for _ in range (cust_num):
         cur.execute("INSERT INTO CUSTOMER_LIST VALUES('"
         '{0:02d}'.format(random.randrange(100)) + h_plate[random.randrange(len(h_plate))] + '{0:04d}'.format(random.randrange(10000)) +
@@ -61,13 +64,16 @@ def mk_test_cust(cust_num):
     return 0
 
 
+
+
+##################################################################
+# Make sample tuple of SHOPPING_PAY and insert it to SHOPPING_PAY
 ## SHOPPING_PAY = {Spay_id, Customer_car_num, Shopping_pay_amount, Shopping_pay_time}
-def init_shopping_pay():
-    for i in range (0,50):
-        for j in range (0,10):
-            cur.execute("INSERT INTO SHOPPING_PAY VALUES('"
-            + str(i) + str(j) + h_plate[random.randrange(len(h_plate))] + str(random.randrange(1000,9999)) +
-            "','" + card[random.randrange(len(card))] + " " + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) + "-" + str(random.randrange(1000,9999)) +
+def mk_sample_spay(spay_num):
+    for _ in range (spay_num):
+        cur.execute("INSERT INTO SHOPPING_PAY VALUES('"
+        '{0:02d}'.format(random.randrange(100)) + h_plate[random.randrange(len(h_plate))] + '{0:04d}'.format(random.randrange(10000)) +
+            "','" + card[random.randrange(len(card))] + " " + '{0:04d}'.format(random.randrange(10000)) + "-" + '{0:04d}'.format(random.randrange(10000)) + "-" + '{0:04d}'.format(random.randrange(10000)) + "-" + '{0:04d}'.format(random.randrange(10000)) +
             "','" + n_first[random.randrange(len(n_first))] + " " + n_middle[random.randrange(len(n_middle))] + " " + n_last[random.randrange(len(n_last))] +
             "')")
     return 0

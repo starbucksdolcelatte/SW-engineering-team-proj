@@ -7,6 +7,7 @@ conn = sqlite3.connect("PMS_db.sqlite",detect_types=sqlite3.PARSE_DECLTYPES)
 
 # Connection 으로부터 Cursor 생성
 cur = conn.cursor()
+
 # Create
 # Parking_status : 0 == vacant ; 1 == occupied ; 2 == moving_out
 cur.execute("""
@@ -30,7 +31,7 @@ cur.execute("""
 # Park_is_paid : 0 is false(N), 1 is true(Y)
 cur.execute("""
     CREATE TABLE PARK_PAY (
-    Ppay_id INTEGER AUTOINCREMENT PRIMARY KEY,
+    Ppay_id INTEGER PRIMARY KEY AUTOINCREMENT,
 	Customer_car_num TEXT NOT NULL,
 	Parking_spot TEXT NOT NULL,
     Park_in timestamp NOT NULL,
@@ -52,7 +53,7 @@ cur.execute("""
 
 cur.execute("""
     CREATE TABLE SHOPPING_PAY (
-    Spay_id INTEGER AUTOINCREMENT PRIMARY KEY,
+    Spay_id INTEGER PRIMARY KEY AUTOINCREMENT,
     Customer_car_num text ,
 	Shopping_pay_amount integer NOT NULL DEFAULT 0,
 	Shopping_pay_time timestamp ,

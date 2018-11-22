@@ -14,36 +14,55 @@ cur.execute("""
 	Parking_spot TEXT PRIMARY KEY,
 	Parking_status integer NOT NULL,
 	Customer_car_num TEXT,
-    FOREIGN KEY (Customer_car_num) REFERENCES CUSTOMER_LIST(Customer_car_num)
+    
+    CONSTRAINT fk_Customer
+    FOREIGN KEY (Customer_car_num)
+    REFERENCES  CUSTOMER_LIST(Customer_car_num)
+    ON DELETE NO ACTION ON UPDATE CASCADE
     )""")
 
 cur.execute("""
     CREATE TABLE CUSTOMER_LIST (
 	Customer_car_num TEXT PRIMARY KEY,
 	Customer_card_info text NOT NULL,
-	Customer_name TEXT,
-    Customer_phone text)""")
+	Customer_name TEXT NOT NULL,
+    Customer_phone text NOT NULL)""")
 
 # Park_is_paid : 0 is false(N), 1 is true(Y)
 cur.execute("""
     CREATE TABLE PARK_PAY (
-	Customer_car_num TEXT,
-	Parking_spot TEXT,
-    Park_in timestamp,
-    Park_out timestamp,
-    Park_free_hour integer NOT NULL,
-	Park_pay_amount integer NOT NULL,
-    Park_is_paid integer,
-    FOREIGN KEY (Customer_car_num) REFERENCES CUSTOMER_LIST(Customer_car_num),
-    FOREIGN KEY (Parking_spot) REFERENCES PARKINGLOT_LIST(Parking_spot)
+    Ppay_id inte PRIMARY KEY,
+	Customer_car_num TEXT NOT NULL,
+	Parking_spot TEXT NOT NULL,
+    Park_in timestamp NOT NULL,
+    Park_out timestamp NOT NULL,
+    Park_free_hour integer NOT NULL DEFAULT 0,
+	Park_pay_amount integer NOT NULL DEFULT 0,
+    Park_is_paid integer NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_Parkinglot
+    FOREIGN KEY (Parking_spot)
+    REFERENCES  PARKINGLOT_LIST(Parking_spot)
+    ON DELETE NO ACTION ON UPDATE CASCADE,
+
+    CONSTRAINT fk_Customer
+    FOREIGN KEY (Customer_car_num)
+    REFERENCES  CUSTOMER_LIST(Customer_car_num)
+    ON DELETE NO ACTION ON UPDATE CASCADE
     )""")
 
 cur.execute("""
     CREATE TABLE SHOPPING_PAY (
-	Customer_phone text,
-	Shopping_pay_amount integer NOT NULL,
-	Shopping_pay_time timestamp,
-    FOREIGN KEY (Customer_phone) REFERENCES CUSTOMER_LIST(Customer_phone))""")
+    Spay_id inte PRIMARY KEY,
+    Customer_car_num text ,
+	Shopping_pay_amount integer NOT NULL DEFAULT 0,
+	Shopping_pay_time timestamp ,
+
+    CONSTRAINT fk_Customer
+    FOREIGN KEY (Customer_car_num)
+    REFERENCES  CUSTOMER_LIST(Customer_car_num)
+    ON DELETE NO ACTION ON UPDATE CASCADE
+    )""")
 
 cur.execute("""
     CREATE TABLE PRICE (

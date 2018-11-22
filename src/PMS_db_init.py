@@ -12,7 +12,9 @@ cur = conn.cursor()
 # Insert
 
 ## PARKINGLOT_LIST = {Parking_spot, Parking_status, Customer_car_num}
+## Parking_status : 0 == vacant ; 1 == occupied ; 2 == moving_out
 ## Total 3 levels, A-J zones, 1-10 spots
+## ['B3-J10', 0, NULL]
 for floor in range (1,4):
     for i in range (0,10):
         for j in range (1,11):

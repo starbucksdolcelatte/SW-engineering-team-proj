@@ -25,8 +25,7 @@ cur.execute("""
     CREATE TABLE CUSTOMER_LIST (
 	Customer_car_num TEXT PRIMARY KEY,
 	Customer_card_info text NOT NULL,
-	Customer_name TEXT NOT NULL,
-    Customer_phone text NOT NULL)""")
+	Customer_name TEXT NOT NULL)""")
 
 # Park_is_paid : 0 is false(N), 1 is true(Y)
 cur.execute("""

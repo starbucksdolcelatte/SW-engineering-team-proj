@@ -34,8 +34,8 @@ cur.execute("""
     Ppay_id INTEGER PRIMARY KEY AUTOINCREMENT,
 	Customer_car_num TEXT NOT NULL,
 	Parking_spot TEXT NOT NULL,
-    Park_in timestamp NOT NULL,
-    Park_out timestamp NOT NULL,
+    Park_in text NOT NULL,
+    Park_out text NOT NULL,
     Park_free_hour integer NOT NULL DEFAULT 0,
 	Park_pay_amount integer NOT NULL DEFAULT 0,
     Park_is_paid integer NOT NULL DEFAULT 0,
@@ -56,7 +56,7 @@ cur.execute("""
     Spay_id INTEGER PRIMARY KEY AUTOINCREMENT,
     Customer_car_num text ,
 	Shopping_pay_amount integer NOT NULL DEFAULT 0,
-	Shopping_pay_time timestamp ,
+	Shopping_pay_time text ,
 
     CONSTRAINT fk_Customer
     FOREIGN KEY (Customer_car_num)

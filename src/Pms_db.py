@@ -117,15 +117,11 @@ class DBinit:
         self.init_discount()
 
 
-    def strDateProp(self, start, end, format, prop):
-        """Get a time at a proportion of a range of two formatted times.
-
-        start and end should be strings specifying times formated in the
-        given format (strftime-style), giving an interval [start, end].
-        prop specifies how a proportion of the interval to be taken after
-        start.  The returned time will be in the specified format.
+    ##### 다른 함수 안에서 쓰이는 함수들 ####
+    def randomDate(self, start, end, prop, format = '%Y-%m-%d'):
         """
-
+        Create random date between start and end.
+        """
         sdate = time.mktime(time.strptime(start, format))
         edate = time.mktime(time.strptime(end, format))
         pdate = sdate + prop * (edate - sdate)
@@ -133,15 +129,9 @@ class DBinit:
         return time.strftime(format, time.localtime(pdate))
 
 
-
-
-    def strTimeProp(self, start, end, format, prop):
-        """Get a time at a proportion of a range of two formatted times.
-
-        start and end should be strings specifying times formated in the
-        given format (strftime-style), giving an interval [start, end].
-        prop specifies how a proportion of the interval to be taken after
-        start.  The returned time will be in the specified format.
+    def randomTime(self, start, end, prop, format = '%I:%M:%S %p'):
+        """
+        Create random time between start and end.
         """
         start_dt = '1/1/2018 ' + start
         end_dt = '1/1/2018 ' + end
@@ -152,15 +142,50 @@ class DBinit:
         return time.strftime(format, time.localtime(ptime))
 
 
+    def cal_freeh(self, spay_amount, discount_list) :
+        '''
+        Calculate park_free_hour.
+        Format of parameters
+          spay_amount : int
+          discount = list ['Shopping_pay_minimum', 'Free_hour']
+        '''
+        for i in range(len(discount_list)):
+            if spay_amount < discount_list[i][0]:
+                return discount_list[i][1]-1
+        return discount_list[i][1]
 
 
-    def randomDate(self, start, end, prop):
-        return self.strDateProp(start, end, '%Y-%m-%d', prop)
+    def cal_price(self, minutes, price_list, free_hour):
+        '''
+        Calculate park_pay_amount.
+        Format of parameters
+          minutes : int
+          price_list = [Unit_minute, Unit_price]
+          free_hour = int
+        '''
+        free_min = free_hour * 60
+        net_min = minutes - free_min
+        if net_min <= 0:
+            return 0
+
+        t = int(net_min / price_list[0])
+        if (net_min % price_list[0] == 0):
+            return int(t * price_list[1])
+        else:
+            return int((t + 1) * price_list[1])
 
 
-    def randomTime(self, start, end, prop):
-        return self.strTimeProp(start, end, '%I:%M:%S %p', prop)
+    def diff_min(self, start, end, format):
+        stime = time.mktime(time.strptime(start, format))
+        etime = time.mktime(time.strptime(end, format))
+        ptime = (etime - stime)
+        return int(ptime/60)
 
+
+    def get_last_id(self, table, table_id):
+        self.cur.execute('SELECT '+table_id+' FROM ' + table + ' WHERE ' + table_id + ' = (SELECT MAX('+table_id+')  FROM '+table+')')
+        last_id = self.cur.fetchone()
+        return last_id[0]
 
     ##################################################################
     ## PARKINGLOT_LIST = {Parking_spot, Parking_status, Customer_car_num}
@@ -245,6 +270,120 @@ class DBinit:
         self.conn.commit()
 
     ##################################################################
+    # Make sample tuple of PARK_PAY and insert them to PARK_PAY
+    ## PARK_PAY = {Ppay_id, Customer_car_num, Parking_spot, Park_in,
+    ##             Park_out, Park_free_hour, Park_pay_amount, Park_is_paid}
+    ## Ppay_id : 튜플 insert 시 자동으로 생성되는거라 얘를 빼고 나머지 컬럼값을 넣어줘야 함
+    ## Customer_car_num 은 SHOPPING_PAY에서 전부 가져온다. 쇼핑한 사람은 모두 주차도 했다고 가정.
+    ## Parking_spot PARKING_LOT 에서 가져온다고 가정. 둘 이상의 튜플이 같은시간대에 동일한 spot 을 가지면 안됨.
+    ## Park_in 은 최소 오전 11시부터, SHOPPING_PAY 의 Shopping_pay_time 전까지
+    ## Park_out 은 SHOPPING_PAY 의 Shopping_pay_time 이후부터 최대 오후 11시까지
+    ## Park_free_hour 는 SHOPPING_PAY 의 Shopping_pay_amount 와 PRICE와 DISCOUNT 테이블에 근거하여 계산
+    ## Park_free_hour 계산하는 모듈 따로 만들어야 함
+    ## Park_is_paid 는 랜덤하게 0과 1 섞어서 넣어줌.
+    def mk_sample_ppay(self, range_list):
+
+        '''
+        Make sample tuples of PARK_PAY and insert them to PARK_PAY
+        PARK_PAY = {Ppay_id, Customer_car_num, Parking_spot, Park_in,
+                    Park_out, Park_free_hour, Park_pay_amount, Park_is_paid}
+        '''
+        # Get Customer_car_num list which match the range of Spay_id from SHOPPING_PAY
+        self.cur.execute("SELECT Customer_car_num FROM SHOPPING_PAY WHERE Spay_id >= ? AND Spay_id < ?",
+                          (range_list[0],range_list[1]))
+        cnum_list = []
+        for row in self.cur:
+            cnum_list.append(row[0])
+
+
+        #### Parking_spot ####
+        # Get Parking_spot list fom PARKINGLOT_LIST
+        self.cur.execute('SELECT Parking_spot FROM PARKINGLOT_LIST')
+        pksp_list = []
+        for row in self.cur:
+            pksp_list.append(row[0])
+
+
+        #### Park_in & Park_out ####
+        # Set opening hours
+        open_time = "11:00:00 AM"
+        close_time = "11:00:00 PM"
+
+        # Get Shopping_pay_time list from SHOPPING_PAY
+        self.cur.execute("SELECT Shopping_pay_time FROM SHOPPING_PAY WHERE Spay_id >= ? AND Spay_id < ?",
+                          (range_list[0],range_list[1]))
+        stime_list = []
+        for row in self.cur:
+            stime_list.append(row[0])
+
+        # Set random park_in time between open_time and shopping_pay_time
+        pin_list = []
+        for stime in stime_list:
+            # stime.split(' ')[0] = 'yyyy-mm-dd-yyyy'
+            # ' '.join((stime.split(' ')[1:])) = 'hh:mm:ss PM/AM'
+            pin_list.append(stime.split(' ')[0] + ' ' + (self.randomTime(open_time, ' '.join((stime.split(' ')[1:])), random.random())))
+
+        # Set random park_out time between shopping_pay_time and close_time
+        pout_list = []
+        for stime in stime_list:
+            # stime.split(' ')[0] = 'yyyy-mm-dd-yyyy'
+            # ' '.join((stime.split(' ')[1:])) = 'hh:mm:ss PM/AM'
+            pout_list.append(stime.split(' ')[0] + ' ' + (self.randomTime(' '.join((stime.split(' ')[1:])), close_time, random.random())))
+
+
+        # Get parking minutes between park_in and park_out.
+        # That is, "how long had this car parked?"
+        pmin_list = []
+        for i in range(len(pin_list)):
+            pmin_list.append(self.diff_min(pin_list[i], pout_list[i], '%Y-%m-%d %I:%M:%S %p'))
+
+
+        #### Park_free_hour ####
+        # Get Shopping_pay_amount list from SHOPPING_PAY
+        self.cur.execute("SELECT Shopping_pay_amount FROM SHOPPING_PAY WHERE Spay_id >= ? AND Spay_id < ?",
+                          (range_list[0],range_list[1]))
+        spay_list = []
+        for row in self.cur:
+            spay_list.append(row[0])
+
+        # Get DISCOUNT table
+        self.cur.execute('SELECT * FROM DISCOUNT')
+        discount_list = []
+        for row in self.cur:
+            discount_list.append(list(row))
+
+        # Calculate Park_free_hour
+        pfrh_list = []
+        for spay in spay_list:
+            pfrh_list.append(self.cal_freeh(spay, discount_list))
+
+
+        #### Park_pay_amount ####
+        # Get PRICE table
+        self.cur.execute('SELECT * FROM PRICE')
+        for row in self.cur:
+            price_list = list(row)
+
+        # Calculate Park_pay_amount
+        ppay_list = []
+        for i in range(len(pmin_list)):
+            ppay_list.append(self.cal_price(pmin_list[i], price_list, pfrh_list[i]))
+
+
+
+        for i in range (len(cnum_list)):
+            # 아래에서 주의해야 할 점
+            # 변수가 text 여야 하면 (예; 차 번호), ",'" + 변수 + "'" 이렇게 넣어줘야 하고
+            # 변수가 int 여야 하면 (예: 결제여부), "," + str(변수) 이렇게 넣어줘야 함
+            self.cur.execute("""INSERT INTO PARK_PAY(Customer_car_num, Parking_spot, Park_in, Park_out,
+                             Park_free_hour, Park_pay_amount, Park_is_paid) VALUES('"""
+                            + cnum_list[i] + "', '" + pksp_list[i] + "', '" + pin_list[i] + "', '" + pout_list[i] + "', "
+                            + str(pfrh_list[i]) + ", " + str(ppay_list[i]) + ", " + str(1) + ")")
+        # commit 을 해줘야 sqlite 에 반영이 됨
+        self.conn.commit()
+
+
+    ##################################################################
     # print tables
     def print_table(self, tbl_name):
         # SQL 쿼리 실행은 cur.execute로 함
@@ -253,3 +392,53 @@ class DBinit:
         rows = self.cur.fetchall()
         for row in rows:
             print(row)
+
+    ##################################################################
+    # Make sample spay, ppay in certain period
+    def mk_sample_spay_ppay(self, start_y, end_y, cust):
+        '''
+        10일마다 약 cust명이 방문했다고 가정.
+        range(start_y, end_y) 사이의 데이터 생성.
+        '''
+        for y in range(start_y, end_y):
+            print(y, ' 년')
+            for m in range(1, 13):
+                print(m, ' 월')
+                for i in range(2):
+                    # Make Sample Shopping pay tuples (day 1~20)
+                    self.mk_sample_spay(cust, str(y) + '-' + str(m) + '-' + str(1+i*10), str(y) + '-' + str(m) + '-' + str(10 + i*10))
+                    # Make Park_pay Table
+                    last = self.get_last_id('SHOPPING_PAY', 'Spay_id')
+                    self.mk_sample_ppay([last - cust + 1, last + 1])
+
+                # Case of the months with 31 days
+                if m in {1, 3, 5, 7, 8, 10, 12} :
+                    # Make Sample Shopping pay tuples (day 21~31)
+                    self.mk_sample_spay(cust, str(y) + '-' + str(m) + '-' + str(21), str(y) + '-' + str(m) + '-' + str(31))
+                    # Make Park_pay Table
+                    last = self.get_last_id('SHOPPING_PAY', 'Spay_id')
+                    self.mk_sample_ppay([last - cust + 1, last + 1])
+
+                # Case of Feb
+                elif m == 2 :
+                    if y % 4 == 0:
+                        # Make Sample Shopping pay tuples (day 21~29)
+                        self.mk_sample_spay(cust, str(y) + '-' + str(m) + '-' + str(21), str(y) + '-' + str(m) + '-' + str(29))
+                        # Make Park_pay Table
+                        last = self.get_last_id('SHOPPING_PAY', 'Spay_id')
+                        self.mk_sample_ppay([last - cust + 1, last + 1])
+
+                    else:
+                        # Make Sample Shopping pay tuples (day 21~28)
+                        self.mk_sample_spay(cust, str(y) + '-' + str(m) + '-' + str(21), str(y) + '-' + str(m) + '-' + str(28))
+                        # Make Park_pay Table
+                        last = self.get_last_id('SHOPPING_PAY', 'Spay_id')
+                        self.mk_sample_ppay([last - cust + 1, last + 1])
+
+                # Case of the months with 30 days
+                else :
+                    # Make Sample Shopping pay tuples (day 21~30)
+                    self.mk_sample_spay(cust, str(y) + '-' + str(m) + '-' + str(21), str(y) + '-' + str(m) + '-' + str(30))
+                    # Make Park_pay Table
+                    last = self.get_last_id('SHOPPING_PAY', 'Spay_id')
+                    self.mk_sample_ppay([last - cust + 1, last + 1])

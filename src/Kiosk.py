@@ -24,7 +24,7 @@ class Kiosk:
     def get_location(self, car_num):
         if len(car_num) != 4:
             print("4자리의 차량번호 입력")
-            return
+            return None
         else:
             self.cursor.execute("select PARKING_SPOT from PARKINGLOT_LIST where customer_car_num like ?",
                                 ('___' + car_num,))

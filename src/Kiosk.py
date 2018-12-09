@@ -1,29 +1,54 @@
 import sqlite3
 
-class Kiosk:
-    def __init__(self, db_filename, staff_tel):
-        print("Kiosk 객체가 생성되었습니다.")
-        self.__staff_tel = staff_tel
-        print("Staff Tel. = " + self.__staff_tel)
 
-        # SQLite DB 연결
-        # db_filename 있으면 연결, 없으면 새로 생성
-        self.conn = sqlite3.connect(db_filename, detect_types=sqlite3.PARSE_DECLTYPES)
-        # Connection 으로부터 Cursor 생성
-        self.cur = self.conn.cursor()
+class Kiosk:
+
+    """
+    staff_tel:str
+    car_num:str
+
+    get_location(car_num:str):str
+    get_car_num():car_num:str
+    get_staff_tel():staff_tel:str
+    set_car_num(str):none
+    set_staff_tel(str):none
+    """
+
+    con = sqlite3.connect("C:\\setermprj\\test.db")
+    cursor = con.cursor()
+
+    def __init__(self):
+        self._staff_tel = '010-0000-0000'
+        self._car_num = None
+
+    def get_location(self, car_num):
+        if len(car_num) != 4:
+            print("4자리의 차량번호 입력")
+            return
+        else:
+            self.cursor.execute("select PARKING_SPOT from PARKINGLOT_LIST where customer_car_num like ?",
+                                ('___' + car_num,))
+            location = self.cursor.fetchone()[0]     # 중복된 차가 없다는 가정 존재
+            print(car_num + "의 주차위치 : " + location)
+            return location
+
+    @property
+    def car_num(self):
+        return self._car_num
+
+    @car_num.setter
+    def car_num(self, new_car_number):
+        if not(len(new_car_number) == 4 and new_car_number.isdigit()):
+            print("4자리의 차량번호 입력")
+        else:
+            self._car_num = new_car_number
 
     @property
     def staff_tel(self):
-        return self.__staff_tel
+        return self._staff_tel
 
-    # 원래 설계는 뒤 4자리만 누르는 걸로 했지만
-    # 그냥 12가1234 이렇게 앞숫자 2자리, 한글 한 자리, 뒤 숫자 4자리의 조합을 모두 입력하는 것으로 한다.
-    def where_is_my_car(self, car_num):
-        self.cur.execute("SELECT parking_spot FROM PARKINGLOT_LIST WHERE Customer_car_num = ?", (car_num,))
-        location = self.cur.fetchone()
-        if location is None :
-            print('해당 번호의 차량이 없습니다.')
-            return None
-        else :
-            print('고객님의 차량은 ', location[0], ' 에 있습니다.')
-            return location[0]
+    @staff_tel.setter
+    def staff_tel(self, telephone):
+        # 정규표현식을 쓰고싶다
+        # if telephone !=
+        self._staff_tel = telephone

@@ -129,14 +129,14 @@ class DBinit:
         return time.strftime(format, time.localtime(pdate))
 
 
-    def randomTime(self, start, end, prop, format = '%I:%M:%S %p'):
+    def randomTime(self, start, end, prop, format = '%I:%M:%S'):
         """
         Create random time between start and end.
         """
         start_dt = '1/1/2018 ' + start
         end_dt = '1/1/2018 ' + end
-        stime = time.mktime(time.strptime(start_dt, '%m/%d/%Y %I:%M:%S %p'))
-        etime = time.mktime(time.strptime(end_dt, '%m/%d/%Y %I:%M:%S %p'))
+        stime = time.mktime(time.strptime(start_dt, '%m/%d/%Y %I:%M:%S'))
+        etime = time.mktime(time.strptime(end_dt, '%m/%d/%Y %I:%M:%S'))
         ptime = stime + prop * (etime - stime)
 
         return time.strftime(format, time.localtime(ptime))
@@ -244,8 +244,8 @@ class DBinit:
         cnum_list = []
         for row in self.cur:
             cnum_list.append(row[0])
-        open_time = "11:00:00 AM"
-        close_time = "11:00:00 PM"
+        open_time = "11:00:00"
+        close_time = "23:00:00"
         for i in range (spay_num):
             self.cur.execute("INSERT INTO SHOPPING_PAY(Customer_car_num, Shopping_pay_amount, Shopping_pay_time) VALUES('"
                         + cnum_list[random.randrange(len(cnum_list))]
@@ -306,8 +306,8 @@ class DBinit:
 
         #### Park_in & Park_out ####
         # Set opening hours
-        open_time = "11:00:00 AM"
-        close_time = "11:00:00 PM"
+        open_time = "11:00:00"
+        close_time = "23:00:00"
 
         # Get Shopping_pay_time list from SHOPPING_PAY
         self.cur.execute("SELECT Shopping_pay_time FROM SHOPPING_PAY WHERE Spay_id >= ? AND Spay_id < ?",
@@ -320,14 +320,14 @@ class DBinit:
         pin_list = []
         for stime in stime_list:
             # stime.split(' ')[0] = 'yyyy-mm-dd-yyyy'
-            # ' '.join((stime.split(' ')[1:])) = 'hh:mm:ss PM/AM'
+            # ' '.join((stime.split(' ')[1:])) = 'hh:mm:ss'
             pin_list.append(stime.split(' ')[0] + ' ' + (self.randomTime(open_time, ' '.join((stime.split(' ')[1:])), random.random())))
 
         # Set random park_out time between shopping_pay_time and close_time
         pout_list = []
         for stime in stime_list:
             # stime.split(' ')[0] = 'yyyy-mm-dd-yyyy'
-            # ' '.join((stime.split(' ')[1:])) = 'hh:mm:ss PM/AM'
+            # ' '.join((stime.split(' ')[1:])) = 'hh:mm:ss'
             pout_list.append(stime.split(' ')[0] + ' ' + (self.randomTime(' '.join((stime.split(' ')[1:])), close_time, random.random())))
 
 
@@ -335,7 +335,7 @@ class DBinit:
         # That is, "how long had this car parked?"
         pmin_list = []
         for i in range(len(pin_list)):
-            pmin_list.append(self.diff_min(pin_list[i], pout_list[i], '%Y-%m-%d %I:%M:%S %p'))
+            pmin_list.append(self.diff_min(pin_list[i], pout_list[i], '%Y-%m-%d %I:%M:%S'))
 
 
         #### Park_free_hour ####

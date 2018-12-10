@@ -129,14 +129,14 @@ class DBinit:
         return time.strftime(format, time.localtime(pdate))
 
 
-    def randomTime(self, start, end, prop, format = '%I:%M:%S'):
+    def randomTime(self, start, end, prop, format = '%H:%M:%S'):
         """
         Create random time between start and end.
         """
-        start_dt = '1/1/2018 ' + start
-        end_dt = '1/1/2018 ' + end
-        stime = time.mktime(time.strptime(start_dt, '%m/%d/%Y %I:%M:%S'))
-        etime = time.mktime(time.strptime(end_dt, '%m/%d/%Y %I:%M:%S'))
+        start_dt = '2018-01-01 ' + start
+        end_dt = '2018-01-01 ' + end
+        stime = time.mktime(time.strptime(start_dt, '%Y-%m-%d %H:%M:%S'))
+        etime = time.mktime(time.strptime(end_dt, '%Y-%m-%d %H:%M:%S'))
         ptime = stime + prop * (etime - stime)
 
         return time.strftime(format, time.localtime(ptime))
@@ -335,7 +335,7 @@ class DBinit:
         # That is, "how long had this car parked?"
         pmin_list = []
         for i in range(len(pin_list)):
-            pmin_list.append(self.diff_min(pin_list[i], pout_list[i], '%Y-%m-%d %I:%M:%S'))
+            pmin_list.append(self.diff_min(pin_list[i], pout_list[i], '%Y-%m-%d %H:%M:%S'))
 
 
         #### Park_free_hour ####

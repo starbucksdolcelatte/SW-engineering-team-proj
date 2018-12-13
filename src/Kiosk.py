@@ -22,21 +22,28 @@ class Kiosk:
         self._car_num = None
 
     def get_location(self, car_num):
-        if not (len(car_num) == 4 and car_num.isdigit()):
-            print("4자리의 차량번호 입력")
-            return
-        else:
-            self.cursor.execute("select PARKING_SPOT from PARKINGLOT_LIST where customer_car_num like ?",
-                                ('___' + car_num,))
-
-            location = self.cursor.fetchone()
-            if location is None:
-                print("차량번호를 다시 확인해주십시오.")
-                return
+        car_num = str(car_num)
+        # 숫자로만 이루어졌는지 홖인
+        if car_num.isdigit():
+            # 4자리가 아니면
+            if len(car_num) != 4:
+                print("4자리의 차량번호 입력")
             else:
-                location = self.cursor.fetchone()[0]
-                print(car_num + "의 주차위치 : " + location)
-                return location
+                self.cursor.execute("select PARKING_SPOT from PARKINGLOT_LIST where customer_car_num like ?",
+                                    ('___' + car_num,))
+
+                location = self.cursor.fetchone()
+                # 잘못된 차랑번호입력 -> 쿼리결과 null
+                if location is None:
+                    print("차량번호를 다시 확인해주십시오.")
+                    return
+                else:  # location is not None
+                    location = location[0]
+                    print(car_num + "의 주차위치 : " + location)
+                    return location
+        # 숫자로만 이루어진 차량번호입력이 아니었을경우 ex) '가12'
+        else:
+                print("4자리의 차량번호 입력")
 
 
     @property

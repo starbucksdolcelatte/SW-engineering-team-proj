@@ -22,16 +22,23 @@ class Kiosk:
         self._car_num = None
 
     def get_location(self, car_num):
-        if not(len(new_car_number) == 4 and new_car_number.isdigit()):
+        if not (len(car_num) == 4 and car_num.isdigit()):
             print("4자리의 차량번호 입력")
-            return None
+            return
         else:
             self.cursor.execute("select PARKING_SPOT from PARKINGLOT_LIST where customer_car_num like ?",
                                 ('___' + car_num,))
-            location = self.cursor.fetchone()[0]     # 중복된 차가 없다는 가정 존재
-            print(car_num + "의 주차위치 : " + location)
-            return location
 
+            location = self.cursor.fetchone()
+            if location is None:
+                print("차량번호를 다시 확인해주십시오.")
+                return
+            else:
+                location = self.cursor.fetchone()[0]
+                print(car_num + "의 주차위치 : " + location)
+                return location
+
+                
     @property
     def car_num(self):
         return self._car_num

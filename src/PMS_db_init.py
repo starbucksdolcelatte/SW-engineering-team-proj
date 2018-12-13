@@ -12,7 +12,7 @@ random.seed(0)
 ## if not exitst "PMS_db.sqlite" then create
 conn = sqlite3.connect("PMS_db.sqlite", detect_types=sqlite3.PARSE_DECLTYPES)
 
-# Create cursir from DB Connection
+# Create cursor from DB Connection
 cur = conn.cursor()
 
 

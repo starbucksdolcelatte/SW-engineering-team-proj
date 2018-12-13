@@ -12,7 +12,7 @@ class DBinit:
         print("DBinit 객체가 생성되었습니다.")
 
         # SQLite DB 연결
-        # test.db가 있으면 연결, 없으면 새로 생성
+        # filename db가 있으면 연결, 없으면 새로 생성
         self.conn = sqlite3.connect(filename, detect_types=sqlite3.PARSE_DECLTYPES)
         # Connection 으로부터 Cursor 생성
         self.cur = self.conn.cursor()
@@ -152,7 +152,7 @@ class DBinit:
         for i in range(len(discount_list)):
             if spay_amount < discount_list[i][0]:
                 return discount_list[i][1]-1
-        return discount_list[i][1]
+        return discount_list[-1][1]
 
 
     def cal_price(self, minutes, price_list, free_hour):

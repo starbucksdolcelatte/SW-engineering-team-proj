@@ -79,5 +79,5 @@ class Recognition:
 
 
 recogtest=Recognition()
-result=recogtest.ExtractNumber('cnum (1).jpg')
+result=recogtest.ExtractNumber('cnum_(1).jpg')
 print(result)

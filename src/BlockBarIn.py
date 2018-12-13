@@ -1,26 +1,22 @@
 # 차단바 제어 프로세스 중 입차 관련
 
 import sqlite3
-from WeightSensor import WeightSensor
-
+from Pms_db import DBinit
 
 class BlockBarIn:
+    def __init__(self, db_path):
+        print("BlockBarIn 객체가 생성되었습니다.")
 
-
-    conn = sqlite3.connect("PMS_db.sqlite", detect_types=sqlite3.PARSE_DECLTYPES)
-    cur = conn.cursor()
-
-    def __init__(self, car_num):
+        # SQLite DB 연결
+        self.mypmsdb = DBinit(db_path)
         self.open = False  #초기 상태 = 차단바 closed
         self.is_rgstrd = False  #초기 상태 = 회원이 아님
-        self.car_num = car_num
         self.is_pssd = False  #초기 상태 = 차량이 아직 안 지나감
         self.paid = False  #초기 상태 = 두번째 방문 차량에 해당됨
 
-    def is_registered(self):
-        curs.execute("select * from customer_list where customer_car_num = ?",
-                     (self.car_num,))
-        cust_info = curs.fetchone()
+    def is_registered(self, car_num):
+        self.mypmsdb.cur.execute("select * from customer_list where customer_car_num = ?", (car_num,))
+        cust_info = self.mypmsdb.cur.fetchone()
         print(cust_info)
         if (cust_info is not None):
             print("등록된 회원입니다.")
@@ -29,31 +25,34 @@ class BlockBarIn:
         else:
             print("등록된 회원이 아닙니다.")
 
-    def paid(self):
-        curs.execute("select * from park_pay where Park_is_paid = ?",
-                     (self.paid,))
-        cust_info_two = curs.fetchone()
-        print(cust_info_two)
-        if (cust_info_two is not None):
-            print("연체된 금액이 없습니다.")
-            self.paid = True
-            return self.paid
-        else:
-            print("연체된 금액이 있습니다.")
+    def is_paid(self, car_num):
+        self.paid = True
+        self.mypmsdb.cur.execute("select Park_is_paid, Park_pay_amount from park_pay where customer_car_num = ?",
+                     (car_num,))
+        cust_info_two = self.mypmsdb.cur.fetchall()
+        for i in range(len(cust_info_two)):
+            if (cust_info_two[i][0] == 0):
+                print("연체된 금액이 있습니다: ",cust_info_two[i][1],"원")
+                self.paid = False
+        return self.paid
+
+
 
 # open은 is_registered와 paid 여부를 따져서 결정됨
-    def open(self, is_rgstrd, paid):
-        if (self.is_rgstrd == True):
-            if (self.paid == True):
+    def blockbar_open(self, car_num):
+        if (self.is_registered(car_num) == True):
+            if (self.is_paid(car_num) == True):
                 print("차단바가 열립니다.")
                 self.open = True
             else:
-                print("오늘은 결제하고 가셈.")
+                print("미납요금이 결제됩니다.")
         else:
+            self.open = False
             print("차단바를 열 수 없습니다.")
 
-    def close(self, is_pssd):
-        if (w_sensor.is_passed = True): #센서에서 차량이 지나갔다고 판단되면
+
+    def blockbar_close(self):
+        if (self.is_passed() == True): #센서에서 차량이 지나갔다고 판단되면
             self.is_pssd = True
         if (self.is_pssd == True):
             print("차단바가 닫힙니다.")
@@ -61,15 +60,5 @@ class BlockBarIn:
         else:
             print("빨리 지나가세요.")
 
-    def getOpen(self):
-        return self.open, self.is_rgstrd, self.car_num, self.is_pssd, self.paid
-
-    def setOpen(self, open):
-        self.open = open
-        self.is_rgstrd = is_rgstrd
-        self.car_num = car_num
-        self.is_pssd = is_pssd
-        self.paid = paid
-
-
-conn.close()
+    def is_passed(self):
+        return true

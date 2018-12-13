@@ -22,7 +22,7 @@ class Kiosk:
         self._car_num = None
 
     def get_location(self, car_num):
-        if len(car_num) != 4:
+        if not(len(new_car_number) == 4 and new_car_number.isdigit()):
             print("4자리의 차량번호 입력")
             return None
         else:

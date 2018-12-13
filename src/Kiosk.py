@@ -13,8 +13,8 @@ class Kiosk:
     set_car_num(str):none
     set_staff_tel(str):none
     """
-
-    con = sqlite3.connect("C:\\setermprj\\test.db")
+    db_path = 'pms_db_fin_1.sqlite'
+    con = sqlite3.connect(db_path)
     cursor = con.cursor()
 
     def __init__(self):
@@ -38,7 +38,7 @@ class Kiosk:
                 print(car_num + "의 주차위치 : " + location)
                 return location
 
-                
+
     @property
     def car_num(self):
         return self._car_num

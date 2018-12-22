@@ -7,6 +7,17 @@ from matplotlib import font_manager, rc
 from Pms_db import DBinit
 
 class Stats:
+    '''
+    sdate : string
+    edate : string
+    criteria : integer
+    -------------------
+    get_stats(self, criteria) # 기준에 따른 통계 결과를 그래프로 리턴
+    mon_stats(self, sdate, edate) # 월별 통계 결과를 리스트로 리턴
+    day_stats(self, sdate, edate) # 요일별 통계 결과를 리스트로 리턴
+    hour_stats(self, sdate, edate) # 시간대별 통계 결과를 리스트로 리턴
+    '''
+
     font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
     rc('font', family=font_name)
     locale.setlocale(locale.LC_ALL, '')

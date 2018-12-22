@@ -252,7 +252,7 @@ class DBinit:
             for zone in range (0,10):
                 for spot in range (1,11):
                     self.cur.execute("INSERT INTO PARKINGLOT_LIST VALUES('B"+str(floor)
-                    +"-"+string.ascii_uppercase[zone]+str(spot)+"', 0, NULL)")
+                    +"-"+string.ascii_uppercase[zone]+str('{0:02d}'.format(spot))+"', 0, NULL)")
 
     ##################################################################
     ## CUSTOMER_LIST = {Customer_car_num, Customer_card_info, Customer_name}

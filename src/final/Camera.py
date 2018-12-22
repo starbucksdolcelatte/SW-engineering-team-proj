@@ -1,13 +1,8 @@
 '''
 cam_id : str
-
 --------------------------------
-proc_vrn(image): string
-proc_zone_now(image): string list
-proc_zone_status(DB): string list
+recog_carnum(self): string
 
-get+위 모든 data fields
-set+위 모든 data fields
 '''
 import random
 from Pms_db import DBinit
@@ -21,7 +16,7 @@ class Camera:
         self.mypmsdb = DBinit(db_path)
 
 
-    def recog(self, is_registered):
+    def recog_carnum(self, is_registered):
         # 실제 번호판 인식이 되어야 하지만, 구현하지 못했으므로
         # 랜덤 차량번호를 return 한다.
         # test를 위해, is_registered가 0이면 등록되지 않은 차량번호를 return,
@@ -36,3 +31,7 @@ class Camera:
             return customer_list[index]
         elif (is_registered == 0):
             return "11기1111"
+
+    @property
+    def cam_id(self):
+        return self.cam_id

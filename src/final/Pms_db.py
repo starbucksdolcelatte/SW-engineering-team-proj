@@ -6,6 +6,50 @@ import time
 # SQLite DB 연결
 
 class DBinit:
+    '''
+    # Opens a connection to the SQLite database file database.
+    conn : sqlite3.connect
+    # A Cursor instance from sqlite3 class
+    cur : sqlite3.connect.cursor
+    --------------------------
+    init_parkinglot_list(self) # Create parkinglot_list Table
+    init_customer_list(self) # Create customer_list Table
+    init_park_pay(self) # Create park_pay Table
+    init_shopping_pay(self) # Create shopping_pay Table
+    init_price(self) # Create price Table
+    init_discount(self) # Create discount Table
+    create_all(self) # Create all of tables above
+
+    # Create random date between start and end.
+    randomDate(self, start, end, prop, format = '%Y-%m-%d')
+    # Create random time between start and end.
+    randomTime(self, start, end, prop, format = '%H:%M:%S')
+    # Calculate park_free_hour.
+    cal_freeh(self, spay_amount, discount_list)
+    # Calculate park_pay_amount.
+    cal_price(self, minutes, price_list, free_hour)
+    # Get the difference between start time and end time and return it as minute format
+    diff_min(self, start, end, format)
+    # Get the last id from certain table
+    get_last_id(self, table, table_id)
+    # print tables
+    print_table(self, tbl_name)
+
+    # Make tuples of PARKINGLOT_LIST and insert them
+    mk_sample_parkinglot_list(self)
+    # Make random sample tuples of CUSTOMER_LIST and insert them
+    mk_mk_sample_cust(self, cust_num)
+    # Make sample tuples of SHOPPING_PAY and insert them to SHOPPING_PAY
+    mk_sample_spay(self, spay_num, start_date, end_date)
+    # Make tuples of PRICE and insert them
+    mk_sample_price(self, unit_minute, unit_price)
+    # Make tuples of DISCOUNT and insert them
+    mk_sample_discount(self, shopping_pay_minimum)
+    # Make sample tuples of PARK_PAY and insert them
+    mk_sample_ppay(self, range_list)
+    # Make sample spay, ppay in certain period
+    mk_sample_spay_ppay(self, start_y, end_y, cust)
+    '''
     random.seed(0)
 
     def __init__(self,filename):
@@ -187,6 +231,17 @@ class DBinit:
         last_id = self.cur.fetchone()
         return last_id[0]
 
+
+    ##################################################################
+    # print tables
+    def print_table(self, tbl_name):
+        # SQL 쿼리 실행은 cur.execute로 함
+        self.cur.execute("select * from " + tbl_name)
+        # 데이타 Fetch
+        rows = self.cur.fetchall()
+        for row in rows:
+            print(row)
+
     ##################################################################
     ## PARKINGLOT_LIST = {Parking_spot, Parking_status, Customer_car_num}
     ## Parking_status : 0 == vacant ; 1 == occupied ; 2 == moving_out
@@ -229,7 +284,7 @@ class DBinit:
 
 
     ##################################################################
-    # Make sample tuple of SHOPPING_PAY and insert it to SHOPPING_PAY
+    # Make sample tuples of SHOPPING_PAY and insert them to SHOPPING_PAY
     ## SHOPPING_PAY = {Spay_id, Customer_car_num, Shopping_pay_amount, Shopping_pay_time}
     def mk_sample_spay(self, spay_num, start_date, end_date):
         '''
@@ -269,8 +324,9 @@ class DBinit:
             self.cur.execute("INSERT INTO DISCOUNT VALUES(" + str((i*2-1)*shopping_pay_minimum) + ", " + str(i) + ")")
         self.conn.commit()
 
+
     ##################################################################
-    # Make sample tuple of PARK_PAY and insert them to PARK_PAY
+    # Make sample tuples of PARK_PAY and insert them to PARK_PAY
     ## PARK_PAY = {Ppay_id, Customer_car_num, Parking_spot, Park_in,
     ##             Park_out, Park_free_hour, Park_pay_amount, Park_is_paid}
     ## Ppay_id : 튜플 insert 시 자동으로 생성되는거라 얘를 빼고 나머지 컬럼값을 넣어줘야 함
@@ -381,17 +437,6 @@ class DBinit:
                             + str(pfrh_list[i]) + ", " + str(ppay_list[i]) + ", " + str(1) + ")")
         # commit 을 해줘야 sqlite 에 반영이 됨
         self.conn.commit()
-
-
-    ##################################################################
-    # print tables
-    def print_table(self, tbl_name):
-        # SQL 쿼리 실행은 cur.execute로 함
-        self.cur.execute("select * from " + tbl_name)
-        # 데이타 Fetch
-        rows = self.cur.fetchall()
-        for row in rows:
-            print(row)
 
     ##################################################################
     # Make sample spay, ppay in certain period

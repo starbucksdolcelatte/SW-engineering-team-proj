@@ -4,26 +4,23 @@ import locale
 import sqlite3
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
-
+from Pms_db import DBinit
 
 class Stats:
-
-    con = sqlite3.connect("C:\\setermprj\\test.db")
-    cursor = con.cursor()
-
     font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
     rc('font', family=font_name)
-
     locale.setlocale(locale.LC_ALL, '')
-
     stat_list = []
 
-    def __init__(self):
+    def __init__(self, db_path):
+        # db_path에 대하여 SQLite DB 연결
+        self.mypmsdb = DBinit(db_path)
         self._sdate = datetime.datetime.now().strftime("%Y-%m-%d")
         self._edate = datetime.datetime.now().strftime("%Y-%m-%d")
 
-        # 일단 월 0 요일 1 시간 2
+        # 월 0 요일 1 시간 2
         self._criteria = 0
+
 
     def get_stats(self, criteria):
 
@@ -96,39 +93,43 @@ class Stats:
         #############################################################
         return self.stat_list
 
+
     #   월별 통계를 구함
     #   sdate 포함, edate 포함하지 않음
     def mon_stats(self, sdate, edate):
         stat_list = []
         # SQL 쿼리
-        self.cursor.execute("select strftime('%Y-%m', Park_in) 날짜, count(*) 차량대수, \
+        self.mypmsdb.cursor.execute("select strftime('%Y-%m', Park_in) 날짜, count(*) 차량대수, \
                                     sum(strftime('%s', Park_out) - strftime('%s', Park_in)) 총시간, \
                             sum(Park_pay_amount) 총요금 from PARK_PAY where Park_out between ? and ? group by 날짜",
                             (sdate, edate))
-        rows = self.cursor.fetchall()
+        rows = self.mypmsdb.cursor.fetchall()
 
         for row in rows:
             stat_tup = list(row)
             stat_list.append(stat_tup)
 
         return stat_list
+
 
     #   요일별 통계를 구함
     #   sdate 포함, edate 포함하지 않음
     #   0~6 일~토
     def day_stats(self, sdate, edate):
         stat_list = []
-        self.cursor.execute("select strftime('%w', Park_in) 요일, count(*) 차량대수, \
+        self.mypmsdb.cursor.execute("select strftime('%w', Park_in) 요일, count(*) 차량대수, \
                                     sum(strftime('%s', Park_out) - strftime('%s', Park_in)) 총시간, \
                             sum(Park_pay_amount) 총요금 from PARK_PAY where Park_out between ? and ? group by 요일",
                             (sdate, edate))
-        rows = self.cursor.fetchall()
+        rows = self.mypmsdb.cursor.fetchall()
 
         for row in rows:
             stat_tup = list(row)
             stat_list.append(stat_tup)
 
         return stat_list
+
+
 
     def hour_stats(self, sdate, edate):
         pass

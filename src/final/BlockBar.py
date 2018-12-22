@@ -4,6 +4,18 @@ import sqlite3
 from Pms_db import DBinit
 
 class BlockBar:
+    '''
+    open : integer
+    is_rgstrd : integer
+    is_pssd : integer
+    paid : integer
+    ----------------------
+    is_registered(self, car_num) # 등록된 회원인지의 여부 반환
+    is_paid(self, car_num) # 미납된 주차요금이 있는지 여부 반환
+    blockbar_open(self, car_num) # 차단바를 연다.
+    blockbar_close(self) # 차단바를 닫는다.
+    is_passed(self) # 초음파 센서를 이용해 차량이 지나갔는지 여부 반환
+    '''
     def __init__(self, db_path):
         print("BlockBarIn 객체가 생성되었습니다.")
 

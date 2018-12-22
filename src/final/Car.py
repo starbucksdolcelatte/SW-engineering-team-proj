@@ -2,8 +2,6 @@ import sqlite3
 import time
 from Pms_db import DBinit
 
-
-
 class Car:
     '''
     car_num : str
@@ -13,13 +11,9 @@ class Car:
     free_hour : integer
     pay_amount : integer
     is_paid : integer
-    mypmsdb = DBinit() instance
-
     ----------------------
-    get+위 모든 data fields
-    set+위 모든 data fields
-    park()
-    move()
+    park(self, parking_lot) # 칸에 주차하기
+    move(self) # 칸에서 차 빼기
     set_pay_amount(self) # 무료 주차 시간, 주차요금 구해 저장하기
     park_pay (self) # 주차요금 결제
     park_pay_fail(self) # test 를 위한 함수 : 한도초과일 경우
@@ -32,10 +26,6 @@ class Car:
         print("Car number = " + self.__car_num)
 
         # SQLite DB 연결
-        # filename db가 있으면 연결, 없으면 새로 생성
-        self.conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
-        # Connection 으로부터 Cursor 생성
-        self.cur = self.conn.cursor()
         self.mypmsdb = DBinit(db_path)
 
         self.__location = '' # 'B1-A1'

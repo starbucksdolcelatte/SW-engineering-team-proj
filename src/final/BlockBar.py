@@ -44,6 +44,7 @@ class BlockBar:
             print("등록된 회원이 아닙니다.")
 
 
+
     def is_paid(self, car_num):
         self.paid = True
         self.mypmsdb.cur.execute("select Park_is_paid, Park_pay_amount from park_pay where customer_car_num = ?",
@@ -53,8 +54,36 @@ class BlockBar:
             if (cust_info_two[i][0] == 0):
                 print("연체된 금액이 있습니다: ",cust_info_two[i][1],"원")
                 self.paid = False
+
+        # 미납요금 결제
+        if(self.paid == False):
+            self.pay(car_num)
+
         return self.paid
 
+
+
+    # 미납요금 결제
+    def pay(self, car_num):
+        # 결제 모듈이 들어가야 함.
+        # 결제 시스템과의 통합 필요.
+        self.mypmsdb.cur.execute("""SELECT Park_is_paid, Park_pay_amount, Park_out
+                                    FROM park_pay WHERE customer_car_num = ?""",
+                                    (car_num,))
+        cust_info = self.mypmsdb.cur.fetchall()
+
+        # 미납요금에 대하여 결제
+        for i in range(len(cust_info)):
+            if (cust_info[i][0] == 0):
+                self.mypmsdb.cur.execute("""UPDATE park_pay
+                                            SET Park_is_paid = 1
+                                            WHERE Park_out = ?""",
+                                            (cust_info[i][2]))
+                # commit 을 해줘야 sqlite 에 반영이 됨
+                self.mypmsdb.conn.commit()
+                print(cust_info[i][2], ' ', cust_info[i][1],
+                ' 원에 대하여 결제가 완료되었습니다.')
+                self.paid = True
 
 
 # open은 is_registered와 paid 여부를 따져서 결정됨
@@ -64,10 +93,11 @@ class BlockBar:
                 print("차단바가 열립니다.")
                 self.open = True
             else:
+                self.mypmsdb.cur.execute()
                 print("미납요금이 결제됩니다.")
         else:
             self.open = False
-            print("차단바를 열 수 없습니다.")
+            print("비회원에게 차단바를 열 수 없습니다.")
 
 
     def blockbar_close(self, t_pssd):

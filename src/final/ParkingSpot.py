@@ -1,7 +1,7 @@
 import sqlite3
 import time
 from Pms_db import DBinit
-import random
+from Usonic import Usonic
 
 
 class ParkingSpot:
@@ -11,6 +11,8 @@ class ParkingSpot:
     status : integer
     led : str
     mypmsdb = DBinit() instance
+    dist : float
+    HEIGHT : float
 
     ----------------------
     get+위 모든 data fields
@@ -33,7 +35,8 @@ class ParkingSpot:
 
         self.__car_num = '' # 'B1-A1'
         self.__status = 0 # Parking_status : 0 == vacant ; 1 == occupied ; 2 == moving_out
-        self.__dist = 300 # 천장부터 바닥까지 거리 : 300 cm
+        self.__HEIGHT = 300 # 천장부터 바닥까지 거리 : 300 cm
+        self.__dist = self.__HEIGHT # 천장부터 물체까지의 거리
         self.__led = 'GREEN'
 
 
@@ -57,64 +60,55 @@ class ParkingSpot:
     def led(self):
         return self.__led
 
-    # 차량번호 설정 
+    # 차량번호 설정
     def set_car_num(self,car_num):
         self.__car_num = car_num
 
-    # 초음파 센서가 측정한 천장과 물체와의 거리 리턴
-    def get_usonic(self, status):
-        random.seed(0)
-        distance = self.__dist # 3 meter : 천장부터 바닥까지
-        # 초음파 센서로부터 신호 받는 부분
-        # ...
-        if (status ==  0) :
-            distance = 298
-        elif (status ==  1) :
-            distance = 70
-        elif (status ==  2) :
-            distance = random.randrange(100,200)
-        else:
-            distance = random.randrange(100,200)
-        return distance
-
-
 
     # 초음파 센서가 측정한 거리를 처리(분석)하여 주차칸 상태 리턴
-    def get_status(self, status):
+    # t_status는 테스트를 위한 param. t_status에 따라 리턴값 달라짐
+    def get_status(self, t_status):
+        # 1초 마다 한 번씩 천장과 물체와의 거리를 분석하여,
+        # 이 칸의 상태를 알아낸다.
+        # 테스트를 위해 5초 동안만 값을 받았다.
         dist_past = 0
         dist_now = 0
 
-        # 5초 마다 한 번씩 천장과 물체와의 거리를 분석하여,
-        # 이 칸의 상태를 알아낸다.
         # status : 0 == vacant ; 1 == occupied ; 2 == moving_out
-        for i in range(3):
-            dist_past = dist_now
+        if(t_status == 0):
+            fr = 295
+            to = 300
+        elif(t_status == 1):
+            fr = 70
+            to = 79
+        elif(t_status == 2):
+            fr = 80
+            to = 200
+
+        for i in range(5):
+            dist_past = dist_now.copy()
             time.sleep(1)
-            dist_now = self.get_usonic(status)
-            # 현재거리 - 과거거리 > 10cm 이면 출차중
-            if (dist_now - dist_past > 10):
+            dist_now = Usonic.get_dist(fr, to)
+
+            # 현재거리 - 과거거리 > 10cm 이고 80 <= 현재거리 <= 200이면 출차중
+            if (dist_now - dist_past > 10 and dist_now >= 80 and dist_now <= 200):
                 self.__status = 2
                 self.set_led()
-            # 현재거리 - 과거거리 < -10cm 이면 입차중
-            elif (dist_now - dist_past < -10):
-                self.__status = 1
-                self.set_led()
 
-            # 현재거리와 과거거리 차이가 크지 않은 경우
             else :
-                # 현재거리가 천장에서 바닥까지의 높이 +- 10 cm 이면 비어 있음
-                if(dist_now > self.dist - 10 and dist_now < self.dist + 10 ):
+                # [천장~바닥 거리 - 15 <= 현재거리 <= 천장~바닥 거리] 이면 비어있음
+                if(dist_now >= (self.__HEIGHT - 15) and dist_now <= self.__HEIGHT ):
                     self.__status = 0
                     self.__car_num = ''
                     self.set_led()
-                # 나머지의 경우 차가 주차중임
+
+                # 나머지의 경우 주차중
                 else:
                     self.__status = 1
                     self.set_led()
+
         print(self.__status)
         return self.__status
-
-
 
     # LED의 색상 변경
     def set_led(self):

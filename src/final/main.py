@@ -3,18 +3,19 @@ from Kiosk import Kiosk
 from ParkingLot import ParkingLot
 from ParkingSpot import ParkingSpot
 from Camera import Camera
-from User import User
 from Pms_db import DBinit
 from Stats import Stats
+from Car import Car
+import time
+
 
 if __name__ == '__main__':
 
     db_path = 'pms_db_fin_1.sqlite'
     in_cam = Camera(db_path, 'entrance')
     out_cam = Camera(db_path, 'exit')
-    block_bar_in = BlockBar(db_path)
-    block_bar_out = BlockBar(db_path)
-
+    bar_in = BlockBar(db_path)
+    bar_out = BlockBar(db_path)
 
 
     print("실행할 프로세스를 선택하세요.")
@@ -23,27 +24,41 @@ if __name__ == '__main__':
     print(a,"번을 선택하셨습니다.")
 
     # 입차
-    if(a == 1):
+    if(a == '1'):
         # 번호판 인식
-        car_num = in_cam.recog_carnum(1)[0]
+        car_num = in_cam.recog_carnum(1)
         print('인식한 차량 번호는 ',car_num,' 입니다.')
+
         # Car 객체 생성
         mycar1 = Car(car_num,db_path)
+
         # 등록된 회원이면 결제여부 확인,
         # 결제가 모두 완료되어 있으면 차단바 열고 아니면 닫기
-        block_bar_in.blockbar_open(mycar1.car_num)
+        bar_in.blockbar_open(mycar1.car_num)
+
+        # 3초 동안 차단바 통과
+        for i in range(3):
+            bar_in.blockbar_close(False)
+            time.sleep(1)
+        # 차단바 통과 완료
+        bar_in.blockbar_close(True)
+
 
     # 출차
-    elif(a == 2):
+    elif(a == '2'):
         # 번호판 인식
-        car_num = pklt_cam.recog_carnum(1)[0]
+        car_num = pklt_cam.recog_carnum(1)
+
         # Car 객체 생성
         mycar2 = Car(car_num, db_path)
         print('인식한 차량 번호는 ',car_num,' 입니다.')
+
         # 결제
         mycar2.park_pay()
+        
         # 무료 주차 시간, 주차요금 구해 저장하기
         mycar2.set_pay_amount()
+
         # Car의 data fields 값을 PARK_PAY 테이블에 삽입하기
         mycar2.insert_ppay()
         # PARKINGLOT_LIST 튜플 업데이트하기

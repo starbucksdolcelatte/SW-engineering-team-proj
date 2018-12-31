@@ -2,7 +2,7 @@ import sqlite3
 import time
 from Pms_db import DBinit
 from Usonic import Usonic
-
+from Camera import Camera
 
 class ParkingSpot:
     '''
@@ -13,61 +13,65 @@ class ParkingSpot:
     mypmsdb = DBinit() instance
     dist : float
     HEIGHT : float
+    cam : Camera() instance
 
     ----------------------
-    get+위 모든 data fields
-    set+위 모든 data fields
-    get_usonic() # 초음파 센서가 측정한 거리 리턴
-    get_status() # 초음파 센서가 측정한 거리를 처리(분석)하여 주차칸 상태 리턴
+    proc_status() # 초음파 센서가 측정한 거리를 처리(분석)하여 주차칸 상태 리턴
+    get_status() # 주차칸 상태 리턴
     set_led() # LED의 색상 변경
-
+    get_led() # LED의 색상 리턴 & 상태 출력
     update_pklt_list(self) # db의 PARKINGLOT_LIST 테이블에 UPDATE
     '''
 
 
     def __init__(self, spot, db_path):
-        print("ParkingSpot 객체가 생성되었습니다.")
+        #print("ParkingSpot 객체가 생성되었습니다.")
         self.__spot = spot # 'B1-A1'
-        print("Parking Spot = " + self.__spot)
+        print("Parking Spot 객체 생성 : " + self.__spot)
+        self.cam = Camera(db_path, self.__spot)
 
         # SQLite DB 연결
         self.mypmsdb = DBinit(db_path)
+        self.mypmsdb.cur.execute("SELECT * FROM PARKINGLOT_LIST WHERE Parking_spot = ?", (self.__spot,))
 
-        self.__car_num = '' # 'B1-A1'
-        self.__status = 0 # Parking_status : 0 == vacant ; 1 == occupied ; 2 == moving_out
+
+        # row = ['B1-A1', 1, '12가1234']
+        row = list(self.mypmsdb.cur.fetchone())
+        print(row)
+
+        self.__car_num = row[2]
+        self.__status = row[1] # Parking_status : 0 == vacant ; 1 == occupied ; 2 == moving_out
         self.__HEIGHT = 300 # 천장부터 바닥까지 거리 : 300 cm
         self.__dist = self.__HEIGHT # 천장부터 물체까지의 거리
-        self.__led = 'GREEN'
+        self.__led = ''
+        self.set_led()
+        print(self.__spot, self.__car_num, self.__status, self.__led)
 
 
     @property
     def car_num(self):
         return self.__car_num
 
-    @property
-    def spot(self):
+    def get_spot(self):
         return self.__spot
-
-    @property
-    def status(self):
-        return self.__status
 
     @property
     def dist(self):
         return self.__dist
 
-    @property
-    def led(self):
-        return self.__led
+
 
     # 차량번호 설정
-    def set_car_num(self,car_num):
+    def set_car_num(self, car_num):
         self.__car_num = car_num
+
+    def get_status(self):
+        return self.__status
 
 
     # 초음파 센서가 측정한 거리를 처리(분석)하여 주차칸 상태 리턴
     # t_status는 테스트를 위한 param. t_status에 따라 리턴값 달라짐
-    def get_status(self, t_status):
+    def proc_status(self, t_status):
         # 1초 마다 한 번씩 천장과 물체와의 거리를 분석하여,
         # 이 칸의 상태를 알아낸다.
         # 테스트를 위해 5초 동안만 값을 받았다.
@@ -86,12 +90,13 @@ class ParkingSpot:
             to = 200
 
         for i in range(5):
-            dist_past = dist_now.copy()
+            dist_past = dist_now
             time.sleep(1)
             dist_now = Usonic.get_dist(fr, to)
+            print('천장과 물체 간의 거리 : ', dist_now, 'cm')
 
-            # 현재거리 - 과거거리 > 10cm 이고 80 <= 현재거리 <= 200이면 출차중
-            if (dist_now - dist_past > 10 and dist_now >= 80 and dist_now <= 200):
+            # 80 <= 현재거리 <= 200이면 출차중
+            if (dist_now >= 80 and dist_now <= 200):
                 self.__status = 2
                 self.set_led()
 
@@ -106,27 +111,30 @@ class ParkingSpot:
                 else:
                     self.__status = 1
                     self.set_led()
+            self.get_led()
 
-        print(self.__status)
         return self.__status
 
-    # LED의 색상 변경
-    def set_led(self):
+    # LED의 색상 얻기
+    def get_led(self):
         if (self.__status == 0) :
-            self.__led = 'GREEN'
-            print("빈 칸입니다.")
+            print(self.__led, " 빈 칸입니다.")
         elif (self.__status == 1) :
-            self.__led = 'RED'
-            print("주차중인 칸입니다.")
+            print(self.__led, " 주차중인 칸입니다.")
         elif (self.__status == 2) :
-            self.__led = 'YELLOW'
-            print("출차중인 칸입니다.")
-
-        print(self.__led)
-
+            print(self.__led, " 출차중인 칸입니다.")
         return self.__led
 
 
+
+    # LED의 색상 설정
+    def set_led(self):
+        if (self.__status == 0) :
+            self.__led = 'GREEN'
+        elif (self.__status == 1) :
+            self.__led = 'RED'
+        elif (self.__status == 2) :
+            self.__led = 'YELLOW'
 
     # db의 PARKINGLOT_LIST 테이블에 업데이트
     def update_pklt(self):

@@ -11,6 +11,8 @@ class Stats:
     sdate : string
     edate : string
     criteria : integer
+    admin_id : string
+    admin_pw : string
     -------------------
     get_stats(self, criteria) # 기준에 따른 통계 결과를 그래프로 리턴
     mon_stats(self, sdate, edate) # 월별 통계 결과를 리스트로 리턴
@@ -18,7 +20,7 @@ class Stats:
     hour_stats(self, sdate, edate) # 시간대별 통계 결과를 리스트로 리턴
     '''
 
-    font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+    font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgunsl.ttf").get_name()
     rc('font', family=font_name)
     locale.setlocale(locale.LC_ALL, '')
     stat_list = []
@@ -26,19 +28,49 @@ class Stats:
     def __init__(self, db_path):
         # db_path에 대하여 SQLite DB 연결
         self.mypmsdb = DBinit(db_path)
-        self._sdate = datetime.datetime.now().strftime("%Y-%m-%d")
-        self._edate = datetime.datetime.now().strftime("%Y-%m-%d")
-
         # 월 0 요일 1 시간 2
         self._criteria = 0
+        self._sdate = datetime.datetime.now().strftime("%Y-%m-%d")
+        self._edate = datetime.datetime.now().strftime("%Y-%m-%d")
+        self._admin_id = 'hufs14'
+        self._admin_pw = 'onframe341'
+
+        print('ID 를 입력하세요.')
+        my_id = input()
+        if(my_id != self._admin_id):
+            print('존재하지 않는 ID입니다.')
+            return
+        else:
+            print('비밀번호를 입력하세요.')
+            my_pw = input()
+            if(my_pw != self._admin_pw):
+                print('비밀번호가 틀렸습니다.')
+                return
+
+
+        print("통계 기준을 선택하세요.")
+        print("0 : 월별     1 : 요일별     2 : 시간대별")
+        criteria = input()
+        self.criteria = int(criteria)
+
+        print('통계 시작날짜를 입력하세요. yyyy-mm-dd')
+        s_date = input()
+        self.sdate = s_date
+        print('통계 종료날짜를 입력하세요. yyyy-mm-dd')
+        e_date = input()
+        self.edate = e_date
+
+        # 통계 그래프 보여주기
+        self.get_stats(int(criteria))
+
 
 
     def get_stats(self, criteria):
 
         """ 테스트용 """
-        print(self.criteria)
-        print(self.sdate)
-        print(self.edate)
+        print('통계 기준 : ',self.criteria)
+        print('통계 시작 날짜 : ', self.sdate)
+        print('통계 종료 날짜 : ', self.edate)
         """         """
 
         # 0 월별 1 요일별 2 시간대별
@@ -92,12 +124,12 @@ class Stats:
         ax3.bar(crit, total_fee, width, color='IndianRed')
 
         if criteria == 0:
-            plt.xlabel("월별 통계")
+            plt.xlabel("MONTHLY REPORT")
         elif criteria == 1:
-            plt.xlabel("요일별 통계")
-        ax1.set_ylabel('차량대수')
-        ax2.set_ylabel('총시간')
-        ax3.set_ylabel('총요금')
+            plt.xlabel("REPORT BY DAY")
+        ax1.set_ylabel('NUMBER OF CARS')
+        ax2.set_ylabel('TOTAL TIME(hour)')
+        ax3.set_ylabel('TOTAL FEE')
 
         plt.show()
 
@@ -110,11 +142,11 @@ class Stats:
     def mon_stats(self, sdate, edate):
         stat_list = []
         # SQL 쿼리
-        self.mypmsdb.cursor.execute("select strftime('%Y-%m', Park_in) 날짜, count(*) 차량대수, \
-                                    sum(strftime('%s', Park_out) - strftime('%s', Park_in)) 총시간, \
+        self.mypmsdb.cur.execute("select strftime('%m', Park_in) 날짜, count(*) 차량대수, \
+                                    (sum(strftime('%s', Park_out) - strftime('%s', Park_in)))/3600 총시간, \
                             sum(Park_pay_amount) 총요금 from PARK_PAY where Park_out between ? and ? group by 날짜",
                             (sdate, edate))
-        rows = self.mypmsdb.cursor.fetchall()
+        rows = self.mypmsdb.cur.fetchall()
 
         for row in rows:
             stat_tup = list(row)
@@ -128,11 +160,11 @@ class Stats:
     #   0~6 일~토
     def day_stats(self, sdate, edate):
         stat_list = []
-        self.mypmsdb.cursor.execute("select strftime('%w', Park_in) 요일, count(*) 차량대수, \
-                                    sum(strftime('%s', Park_out) - strftime('%s', Park_in)) 총시간, \
+        self.mypmsdb.cur.execute("select strftime('%w', Park_in) 요일, count(*) 차량대수, \
+                                    (sum(strftime('%s', Park_out) - strftime('%s', Park_in)))/3600 총시간, \
                             sum(Park_pay_amount) 총요금 from PARK_PAY where Park_out between ? and ? group by 요일",
                             (sdate, edate))
-        rows = self.mypmsdb.cursor.fetchall()
+        rows = self.mypmsdb.cur.fetchall()
 
         for row in rows:
             stat_tup = list(row)

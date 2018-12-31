@@ -8,16 +8,10 @@ class ParkingLot:
     '''
     pksp_list : list of ParkingSpot() instances
     mypmsdb = DBinit() instance
-
-
     ----------------------
     get+위 모든 data fields
     set+위 모든 data fields
-    get_usonic() # 초음파 센서가 측정한 거리 리턴
-    get_status() # 초음파 센서가 측정한 거리를 처리(분석)하여 주차칸 상태 리턴
-    set_led() # LED의 색상 변경 후 수정
-
-    update_pklt_list(self) # db의 PARKINGLOT_LIST 테이블에 UPDATE
+    set_display() # 전광판에 층마다 남은 자리 띄우기
     '''
 
     def __init__(self, db_path):
@@ -32,9 +26,29 @@ class ParkingLot:
         pksp_list = []
         for row in self.mypmsdb.cur:
             pksp_list.append(row[0])
-            print(row[0])
 
-        self.__pksp_list = [[[ParkingSpot(pksp_list[l*100 + j*10 + i],db_path) for i in range(10)] for j in range(10)] for l in range(3)]
+            #print(row[0])
+
+        self.__pksp_list = [ParkingSpot(pksp_list[i], db_path)
+                            for i in range(len(pksp_list))]
+
+    def set_display(self):
+        self.mypmsdb.cur.execute('SELECT Parking_status FROM PARKINGLOT_LIST')
+        pklt = []
+        for row in self.mypmsdb.cur:
+            if (row[0] == 0):
+                pklt.append(1)
+            else:
+                pklt.append(0)
+        empty= [[sum(pklt[:100])], [sum(pklt[100:200])], [sum(pklt[200:300])]]
+        return empty
+
+    def display(self):
+        empty = self.set_display()
+        print("#### 주차장 빈 자리 수 ####")
+        print("지하 1층 : ", empty[0])
+        print("지하 2층 : ", empty[1])
+        print("지하 3층 : ", empty[2])
 
 
     @property

@@ -5,12 +5,14 @@ recog_carnum(self): string
 
 '''
 import random
+from datetime import datetime
 from Pms_db import DBinit
 
 class Camera:
+    random.seed(datetime.now())
 
     def __init__(self, db_path, cam_id):
-        print(cam_id, " : Camera 객체가 생성되었습니다.")
+        #print(cam_id, " : Camera 객체가 생성되었습니다.")
         # Camera ID 설정
         self.__cam_id = cam_id
         # SQLite DB 연결
@@ -29,7 +31,7 @@ class Camera:
             customer_list = []
             for row in self.mypmsdb.cur:
                 customer_list.append(list(row)[0])
-            print(customer_list)
+            #print(customer_list)
 
             # 주차장 안에 주차된 차량번호에 대하여,
             # Get PARKING_LOT table
@@ -46,10 +48,10 @@ class Camera:
                 # 주차장 안에 있는 차량번호는 customer_list 에서 삭제
                 for row in pklt_list:
                     if(row in customer_list):
-                        print('\n\n\n 있음 \n\n\n')
+                        #print('\n\n\n 있음 \n\n\n')
                         customer_list.remove(row)
 
-                print(customer_list)
+                #print(customer_list)
 
                 to = len(customer_list)
                 index = random.randrange(0, to)

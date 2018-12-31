@@ -53,7 +53,7 @@ class DBinit:
     random.seed(0)
 
     def __init__(self,filename):
-        print("DBinit 객체가 생성되었습니다.")
+        #print("DBinit 객체가 생성되었습니다.")
 
         # SQLite DB 연결
         # filename db가 있으면 연결, 없으면 새로 생성
@@ -98,8 +98,8 @@ class DBinit:
             Ppay_id INTEGER PRIMARY KEY AUTOINCREMENT,
         	Customer_car_num TEXT NOT NULL,
         	Parking_spot TEXT NOT NULL,
-            Park_in text NOT NULL,
-            Park_out text NOT NULL,
+            Park_in text,
+            Park_out text,
             Park_free_hour integer NOT NULL DEFAULT 0,
         	Park_pay_amount integer NOT NULL DEFAULT 0,
             Park_is_paid integer NOT NULL DEFAULT 0,
